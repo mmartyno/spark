@@ -26,7 +26,7 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.concurrent.Future
 
-import org.apache.hadoop.fs.Path
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.mesos.Protos.{TaskInfo => MesosTaskInfo, _}
 import org.apache.mesos.SchedulerDriver
@@ -62,9 +62,11 @@ private[spark] class MesosCoarseGrainedSchedulerBackend(
 
   private lazy val hadoopDelegationTokenManager: MesosHadoopDelegationTokenManager =
     new MesosHadoopDelegationTokenManager(conf, sc.hadoopConfiguration, driverEndpoint, { hadoopConf =>
-      conf.get(FILESYSTEMS_TO_ACCESS)
+      val extraFilesystems = conf.get(FILESYSTEMS_TO_ACCESS)
         .map(new Path(_).getFileSystem(hadoopConf))
         .toSet
+      val defaultFs = FileSystem.get(hadoopConf).getHomeDirectory.getFileSystem(hadoopConf)
+      extraFilesystems + defaultFs
     })
 
   // Blacklist a slave after this many failures
