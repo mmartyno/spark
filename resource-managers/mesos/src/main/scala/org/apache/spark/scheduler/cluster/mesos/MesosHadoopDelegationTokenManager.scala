@@ -21,6 +21,7 @@ import java.security.PrivilegedExceptionAction
 import java.util.concurrent.{ScheduledExecutorService, TimeUnit}
 
 import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.FileSystem
 import org.apache.hadoop.security.UserGroupInformation
 
 import org.apache.spark.SparkConf
@@ -44,7 +45,8 @@ import org.apache.spark.util.ThreadUtils
 private[spark] class MesosHadoopDelegationTokenManager(
     conf: SparkConf,
     hadoopConfig: Configuration,
-    driverEndpoint: RpcEndpointRef)
+    driverEndpoint: RpcEndpointRef,
+    fileSystems: Configuration => Set[FileSystem])
   extends Logging {
 
   require(driverEndpoint != null, "DriverEndpoint is not initialized")
@@ -53,7 +55,7 @@ private[spark] class MesosHadoopDelegationTokenManager(
     ThreadUtils.newDaemonSingleThreadScheduledExecutor("Credential Renewal Thread")
 
   private val tokenManager: HadoopDelegationTokenManager =
-    new HadoopDelegationTokenManager(conf, hadoopConfig)
+    new HadoopDelegationTokenManager(conf, hadoopConfig, fileSystems)
 
   private val principal: String = conf.get(config.PRINCIPAL).orNull
 

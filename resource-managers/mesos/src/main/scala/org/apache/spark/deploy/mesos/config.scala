@@ -129,4 +129,11 @@ package object config {
         "when launching drivers. Default is to accept all offers with sufficient resources.")
       .stringConf
       .createWithDefault("")
+
+  private[spark] val FILESYSTEMS_TO_ACCESS = ConfigBuilder("spark.mesos.access.hadoopFileSystems")
+    .doc("Extra Hadoop filesystem URLs for which to request delegation tokens. The filesystem " +
+      "that hosts fs.defaultFS does not need to be listed here.")
+    .stringConf
+    .toSequence
+    .createWithDefault(Nil)
 }
