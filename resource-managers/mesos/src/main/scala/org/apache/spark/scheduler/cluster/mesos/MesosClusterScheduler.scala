@@ -481,7 +481,7 @@ private[spark] class MesosClusterScheduler(
     }
     val cmdOptions = generateCmdOption(desc, sandboxPath).mkString(" ")
     val primaryResource = new File(sandboxPath, desc.jarUrl.split("/").last).toString()
-    val appArguments = desc.command.arguments.mkString(" ")
+    val appArguments = desc.command.arguments.map(shellEscape).mkString(" ")
 
     s"$executable $cmdOptions $primaryResource $appArguments"
   }
